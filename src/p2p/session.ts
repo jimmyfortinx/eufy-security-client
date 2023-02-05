@@ -1299,6 +1299,13 @@ export class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEvents> {
                     if (message.signCode > 0 && data_length >= 128) {
                         const key = message.data.slice(22, 150);
                         const rsaKey = this.currentMessageState[message.dataType].rsaKey;
+
+                        if (data_length >= 64000) {
+                            this.log.warn(`Station ${this.rawStation.station_sn} - Received a too large message, skipping it`);
+                            this.expectedSeqNo[message.dataType] = this._incrementSequence(this.expectedSeqNo[message.dataType]);
+                            return;
+                        }
+
                         if (rsaKey) {
                             try {
                                 videoMetaData.aesKey = rsaKey.decrypt(key).toString("hex");
