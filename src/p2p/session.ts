@@ -1300,20 +1300,13 @@ export class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEvents> {
                         const key = message.data.slice(22, 150);
                         const rsaKey = this.currentMessageState[message.dataType].rsaKey;
 
-                        if (data_length >= 64000) {
-                            this.log.warn(`Station ${this.rawStation.station_sn} - Received a too large message, skipping it`);
-                            this.expectedSeqNo[message.dataType] = this._incrementSequence(this.expectedSeqNo[message.dataType]);
-                            return;
-                        }
-
                         if (rsaKey) {
                             try {
                                 videoMetaData.aesKey = rsaKey.decrypt(key).toString("hex");
                                 this.log.debug(`Station ${this.rawStation.station_sn} - Decrypted AES key: ${videoMetaData.aesKey}`);
                             } catch (error) {
                                 this.log.warn(`Station ${this.rawStation.station_sn} - AES key could not be decrypted! The entire stream is discarded. - Error:`, error);
-                                this.currentMessageState[message.dataType].invalidStream = true;
-                                this.emit("livestream error", message.channel, new LivestreamError(`Station ${this.rawStation.station_sn} AES key could not be decrypted! The entire stream is discarded.`));
+                                this.expectedSeqNo[message.dataType] = this._incrementSequence(this.expectedSeqNo[message.dataType]);
                                 return;
                             }
                         } else {
