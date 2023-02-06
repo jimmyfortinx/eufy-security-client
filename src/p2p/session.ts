@@ -1305,7 +1305,7 @@ export class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEvents> {
                                 videoMetaData.aesKey = rsaKey.decrypt(key).toString("hex");
                                 this.log.debug(`Station ${this.rawStation.station_sn} - Decrypted AES key: ${videoMetaData.aesKey}`);
                             } catch (error) {
-                                this.log.warn(`Station ${this.rawStation.station_sn} - AES key could not be decrypted! The entire stream is discarded. - Error:`, error);
+                                this.log.warn(`Station ${this.rawStation.station_sn} - AES key could not be decrypted! The message is discarded. - Error:`, error);
                                 this.expectedSeqNo[message.dataType] = this._incrementSequence(this.expectedSeqNo[message.dataType]);
                                 return;
                             }
