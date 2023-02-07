@@ -1321,9 +1321,11 @@ export class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEvents> {
                         if (rsaKey) {
                             try {
                                 videoMetaData.aesKey = rsaKey.decrypt(key).toString("hex");
+                                this.previousAesKey = key;
                                 this.log.debug(`Station ${this.rawStation.station_sn} - Decrypted AES key: ${videoMetaData.aesKey}`);
                             } catch (error) {
                                 if (this.previousAesKey) {
+                                    this.log.debug(`Station ${this.rawStation.station_sn} - Message bigger than expected ${data_length}. Reusing the previous key to find back the message.`);
                                     videoMetaData.aesKey = rsaKey.decrypt(this.previousAesKey).toString("hex");
                                     payloadStart = message.data.indexOf(this.previousAesKey) - 22;
                                 } else {
