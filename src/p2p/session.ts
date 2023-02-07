@@ -75,6 +75,7 @@ export class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEvents> {
     private currentMessageState: {
         [dataType: number]: P2PDataMessageState;
     } = {};
+    private previousAesKey: Buffer | undefined = undefined;
 
     private talkbackStream?: TalkbackStream;
 
@@ -1312,17 +1313,8 @@ export class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEvents> {
                         aesKey: ""
                     };
                     const data_length = message.data.readUInt32LE();
-                    const isKeyFrame = message.data.slice(4, 5).readUInt8() === 1 ? true : false;
 
-                    videoMetaData.videoDataLength = message.data.slice(0, 4).readUInt32LE();
-                    videoMetaData.streamType = message.data.slice(5, 6).readUInt8();
-                    videoMetaData.videoSeqNo = message.data.slice(6, 8).readUInt16LE();
-                    videoMetaData.videoFPS = message.data.slice(8, 10).readUInt16LE();
-                    videoMetaData.videoWidth = message.data.slice(10, 12).readUInt16LE();
-                    videoMetaData.videoHeight = message.data.slice(12, 14).readUInt16LE();
-                    videoMetaData.videoTimestamp = message.data.slice(14, 20).readUIntLE(0, 6);
-
-                    let payloadStart = 22;
+                    let payloadStart = 0;
                     if (message.signCode > 0 && data_length >= 128) {
                         const key = message.data.slice(22, 150);
                         const rsaKey = this.currentMessageState[message.dataType].rsaKey;
@@ -1331,10 +1323,16 @@ export class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEvents> {
                                 videoMetaData.aesKey = rsaKey.decrypt(key).toString("hex");
                                 this.log.debug(`Station ${this.rawStation.station_sn} - Decrypted AES key: ${videoMetaData.aesKey}`);
                             } catch (error) {
-                                this.log.warn(`Station ${this.rawStation.station_sn} - AES key could not be decrypted! The entire stream is discarded. - Error:`, error);
-                                this.currentMessageState[message.dataType].invalidStream = true;
-                                this.emit("livestream error", message.channel, new LivestreamError(`Station ${this.rawStation.station_sn} AES key could not be decrypted! The entire stream is discarded.`));
-                                return;
+                                if (this.previousAesKey) {
+                                    videoMetaData.aesKey = rsaKey.decrypt(this.previousAesKey).toString("hex");
+                                    payloadStart = message.data.indexOf(this.previousAesKey) - 22;
+                                } else {
+                                    this.log.warn(`Station ${this.rawStation.station_sn} - AES key could not be decrypted! The entire stream is discarded. - Error:`, error);
+                                    this.currentMessageState[message.dataType].invalidStream = true;
+                                    this.emit("livestream error", message.channel, new LivestreamError(`Station ${this.rawStation.station_sn} AES key could not be decrypted! The entire stream is discarded.`));
+                                    return;
+                                }
+
                             }
                         } else {
                             this.log.warn(`Station ${this.rawStation.station_sn} - Private RSA key is missing! Stream could not be decrypted. The entire stream is discarded.`);
@@ -1342,7 +1340,22 @@ export class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEvents> {
                             this.emit("livestream error", message.channel, new LivestreamError(`Station ${this.rawStation.station_sn} private RSA key is missing! Stream could not be decrypted. The entire stream is discarded.`));
                             return;
                         }
-                        payloadStart = 151;
+                    }
+
+                    const isKeyFrame = message.data.slice(payloadStart + 4, payloadStart + 5).readUInt8() === 1 ? true : false;
+
+                    videoMetaData.videoDataLength = message.data.slice(payloadStart + 0, payloadStart + 4).readUInt32LE();
+                    videoMetaData.streamType = message.data.slice(payloadStart + 5, payloadStart + 6).readUInt8();
+                    videoMetaData.videoSeqNo = message.data.slice(payloadStart + 6, payloadStart + 8).readUInt16LE();
+                    videoMetaData.videoFPS = message.data.slice(payloadStart + 8, payloadStart + 10).readUInt16LE();
+                    videoMetaData.videoWidth = message.data.slice(payloadStart + 10, payloadStart + 12).readUInt16LE();
+                    videoMetaData.videoHeight = message.data.slice(payloadStart + 12, payloadStart + 14).readUInt16LE();
+                    videoMetaData.videoTimestamp = message.data.slice(payloadStart + 14, payloadStart + 20).readUIntLE(0, 6);
+
+                    if (videoMetaData.aesKey !== "") {
+                        payloadStart += 151;
+                    } else {
+                        payloadStart += 22;
                     }
 
                     let video_data: Buffer;
