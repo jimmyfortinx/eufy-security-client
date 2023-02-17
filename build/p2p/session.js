@@ -23,7 +23,7 @@ class P2PClientProtocol extends tiny_typed_emitter_1.TypedEmitter {
         this.MAX_AKNOWLEDGE_TIMEOUT = 15 * 1000;
         this.MAX_LOOKUP_TIMEOUT = 15 * 1000;
         this.LOOKUP_RETRY_TIMEOUT = 150;
-        this.MAX_EXPECTED_SEQNO_WAIT = 20 * 1000;
+        this.MAX_EXPECTED_SEQNO_WAIT = process.env.MAX_EXPECTED_SEQNO_WAIT ? parseInt(process.env.MAX_EXPECTED_SEQNO_WAIT) : 20 * 1000;
         this.HEARTBEAT_INTERVAL = 5 * 1000;
         this.MAX_COMMAND_QUEUE_TIMEOUT = 120 * 1000;
         this.AUDIO_CODEC_ANALYZE_TIMEOUT = 650;
@@ -887,15 +887,13 @@ class P2PClientProtocol extends tiny_typed_emitter_1.TypedEmitter {
                 else {
                     if (!this.currentMessageState[dataType].waitForSeqNoTimeout)
                         this.currentMessageState[dataType].waitForSeqNoTimeout = setTimeout(() => {
-                            this.endStream(dataType, true);
+                            console.log("resendNotAcknowledgedCommand", this.expectedSeqNo[dataType]);
+                            this.resendNotAcknowledgedCommand(this.expectedSeqNo[dataType]);
                             this.currentMessageState[dataType].waitForSeqNoTimeout = undefined;
                         }, this.MAX_EXPECTED_SEQNO_WAIT);
                     if (!this.currentMessageState[dataType].queuedData.get(message.seqNo)) {
                         this.currentMessageState[dataType].queuedData.set(message.seqNo, message);
                         this.log.debug(`Station ${this.rawStation.station_sn} - DATA ${types_1.P2PDataType[message.type]} - Received not expected sequence, added to the queue for future processing (expectedSeqNo: ${this.expectedSeqNo[dataType]} seqNo: ${message.seqNo} queuedData.size: ${this.currentMessageState[dataType].queuedData.size})`);
-                        if (this.currentMessageState[dataType].queuedData.size === 200) {
-                            this.resendNotAcknowledgedCommand(this.expectedSeqNo[dataType]);
-                        }
                     }
                     else {
                         this.log.debug(`Station ${this.rawStation.station_sn} - DATA ${types_1.P2PDataType[message.type]} - Received not expected sequence, discarded since already present in queue for future processing (expectedSeqNo: ${this.expectedSeqNo[dataType]} seqNo: ${message.seqNo} queuedData.size: ${this.currentMessageState[dataType].queuedData.size})`);
