@@ -154,7 +154,7 @@ export class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEvents> {
             return this._isBetween(receivedSequence, expectedSequence - this.SEQUENCE_PROCESSING_BOUNDARY, expectedSequence);
         } else { // there was a sequence number reset recently
             const isInRangeAfterReset = this._isBetween(receivedSequence, 0, expectedSequence);
-            const isInRangeBeforeReset = this._isBetween(receivedSequence, this.MAX_SEQUENCE_NUMBER + (expectedSequence - this.SEQUENCE_PROCESSING_BOUNDARY), this.MAX_SEQUENCE_NUMBER);
+            const isInRangeBeforeReset = this._isBetween(receivedSequence, this.MAX_SEQUENCE_NUMBER + (expectedSequence - this.SEQUENCE_PROCESSING_BOUNDARY), this.MAX_SEQUENCE_NUMBER + 1);
             return (isInRangeBeforeReset || isInRangeAfterReset);
         }
     }
