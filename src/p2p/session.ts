@@ -36,7 +36,7 @@ export class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEvents> {
     private readonly AUDIO_CODEC_ANALYZE_TIMEOUT = 650;
     private readonly KEEPALIVE_INTERVAL = 5 * 1000;
     private readonly ESD_DISCONNECT_TIMEOUT = 30 * 1000;
-    private readonly MAX_STREAM_DATA_WAIT = 5 * 1000;
+    private readonly MAX_STREAM_DATA_WAIT = process.env.MAX_STREAM_DATA_WAIT ? parseInt(process.env.MAX_STREAM_DATA_WAIT) : 5 * 1000;
     private readonly RESEND_NOT_ACKNOWLEDGED_COMMAND = 100;
 
     private readonly UDP_RECVBUFFERSIZE_BYTES = 1048576;
