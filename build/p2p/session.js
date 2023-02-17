@@ -893,6 +893,9 @@ class P2PClientProtocol extends tiny_typed_emitter_1.TypedEmitter {
                     if (!this.currentMessageState[dataType].queuedData.get(message.seqNo)) {
                         this.currentMessageState[dataType].queuedData.set(message.seqNo, message);
                         this.log.debug(`Station ${this.rawStation.station_sn} - DATA ${types_1.P2PDataType[message.type]} - Received not expected sequence, added to the queue for future processing (expectedSeqNo: ${this.expectedSeqNo[dataType]} seqNo: ${message.seqNo} queuedData.size: ${this.currentMessageState[dataType].queuedData.size})`);
+                        if (this.currentMessageState[dataType].queuedData.size === 200) {
+                            this.resendNotAcknowledgedCommand(this.expectedSeqNo[dataType]);
+                        }
                     }
                     else {
                         this.log.debug(`Station ${this.rawStation.station_sn} - DATA ${types_1.P2PDataType[message.type]} - Received not expected sequence, discarded since already present in queue for future processing (expectedSeqNo: ${this.expectedSeqNo[dataType]} seqNo: ${message.seqNo} queuedData.size: ${this.currentMessageState[dataType].queuedData.size})`);
