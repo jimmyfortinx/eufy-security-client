@@ -3,7 +3,7 @@ import { HTTPApi } from "./api";
 import { AlarmTone, NotificationSwitchMode, DeviceType, FloodlightMotionTriggeredDistance, GuardMode, NotificationType, PowerSource, PropertyName, TimeFormat, CommandName, VideoTypeStoreToNAS, HB3DetectionTypes } from "./types";
 import { SnoozeDetail, StationListResponse } from "./models";
 import { IndexedProperty, PropertyMetadataAny, PropertyValue, PropertyValues, RawValues, StationEvents, Schedule } from "./interfaces";
-import { P2PConnectionType, PanTiltDirection, VideoCodec, WatermarkSetting1, WatermarkSetting2, WatermarkSetting3, WatermarkSetting4 } from "../p2p/types";
+import { FilterDetectType, FilterEventType, FilterStorageType, P2PConnectionType, PanTiltDirection, VideoCodec, WatermarkSetting1, WatermarkSetting2, WatermarkSetting3, WatermarkSetting4 } from "../p2p/types";
 import { Device } from "./device";
 import { PushMessage } from "../push/models";
 export declare class Station extends TypedEmitter<StationEvents> {
@@ -22,8 +22,10 @@ export declare class Station extends TypedEmitter<StationEvents> {
     static readonly CHANNEL: number;
     static readonly CHANNEL_INDOOR: number;
     private pinVerified;
-    protected constructor(api: HTTPApi, station: StationListResponse, publicKey?: string);
-    static initialize(api: HTTPApi, stationData: StationListResponse): Promise<Station>;
+    protected constructor(api: HTTPApi, station: StationListResponse, ipAddress?: string, publicKey?: string);
+    protected initializeState(): void;
+    initialize(): void;
+    static getInstance(api: HTTPApi, stationData: StationListResponse, ipAddress?: string): Promise<Station>;
     getStateID(state: string, level?: number): string;
     getStateChannel(): string;
     getRawStation(): StationListResponse;
@@ -33,14 +35,14 @@ export declare class Station extends TypedEmitter<StationEvents> {
     protected handlePropertyChange(metadata: PropertyMetadataAny, oldValue: PropertyValue, newValue: PropertyValue): void;
     updateRawProperty(type: number, value: string): boolean;
     protected convertRawPropertyValue(property: PropertyMetadataAny, value: string): PropertyValue;
-    getPropertyMetadata(name: string): PropertyMetadataAny;
+    getPropertyMetadata(name: string, hidden?: boolean): PropertyMetadataAny;
     getPropertyValue(name: string): PropertyValue;
     hasPropertyValue(name: string): boolean;
     getRawProperty(type: number): string;
     getRawProperties(): RawValues;
     getProperties(): PropertyValues;
-    getPropertiesMetadata(): IndexedProperty;
-    hasProperty(name: string): boolean;
+    getPropertiesMetadata(hidden?: boolean): IndexedProperty;
+    hasProperty(name: string, hidden?: boolean): boolean;
     getCommands(): Array<CommandName>;
     hasCommand(name: CommandName): boolean;
     static getChannel(type: number): number;
@@ -78,7 +80,7 @@ export declare class Station extends TypedEmitter<StationEvents> {
     private onAlarmEvent;
     setGuardMode(mode: GuardMode): Promise<void>;
     getCameraInfo(): Promise<void>;
-    getStorageInfo(): Promise<void>;
+    getStorageInfoEx(): Promise<void>;
     private onAlarmMode;
     private getArmDelay;
     private _getDeviceSerial;
@@ -268,6 +270,7 @@ export declare class Station extends TypedEmitter<StationEvents> {
     private onDeviceJammed;
     private onDeviceLowBattery;
     private onDeviceWrongTryProtectAlarm;
+    private onSdInfoEx;
     setVideoTypeStoreToNAS(device: Device, value: VideoTypeStoreToNAS): Promise<void>;
     snooze(device: Device, value: SnoozeDetail): Promise<void>;
     addUser(device: Device, username: string, shortUserId: string, passcode: string, schedule?: Schedule): Promise<void>;
@@ -288,4 +291,15 @@ export declare class Station extends TypedEmitter<StationEvents> {
     private _sendLockV12P2PCommand;
     queryAllUserId(device: Device): Promise<void>;
     chimeHomebase(value: number): Promise<void>;
+    private onImageDownload;
+    downloadImage(cover_path: string): Promise<void>;
+    private onTFCardStatus;
+    databaseQueryLatestInfo(): Promise<void>;
+    databaseQueryLocal(serialNumbers: Array<string>, startDate: Date, endDate: Date, eventType?: FilterEventType, detectionType?: FilterDetectType, storageType?: FilterStorageType): Promise<void>;
+    databaseDelete(ids: Array<number>): Promise<void>;
+    databaseCountByDate(startDate: Date, endDate: Date): Promise<void>;
+    private onDatabaseQueryLatest;
+    private onDatabaseQueryLocal;
+    private onDatabaseCountByDate;
+    private onDatabaseDelete;
 }

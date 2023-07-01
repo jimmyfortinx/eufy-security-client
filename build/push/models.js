@@ -7,7 +7,7 @@ var ProcessingState;
     ProcessingState[ProcessingState["MCS_TAG_AND_SIZE"] = 1] = "MCS_TAG_AND_SIZE";
     ProcessingState[ProcessingState["MCS_SIZE"] = 2] = "MCS_SIZE";
     ProcessingState[ProcessingState["MCS_PROTO_BYTES"] = 3] = "MCS_PROTO_BYTES";
-})(ProcessingState = exports.ProcessingState || (exports.ProcessingState = {}));
+})(ProcessingState || (exports.ProcessingState = ProcessingState = {}));
 var MessageTag;
 (function (MessageTag) {
     MessageTag[MessageTag["HeartbeatPing"] = 0] = "HeartbeatPing";
@@ -27,5 +27,5 @@ var MessageTag;
     MessageTag[MessageTag["BindAccountResponse"] = 14] = "BindAccountResponse";
     MessageTag[MessageTag["TalkMetadata"] = 15] = "TalkMetadata";
     MessageTag[MessageTag["NumProtoTypes"] = 16] = "NumProtoTypes";
-})(MessageTag = exports.MessageTag || (exports.MessageTag = {}));
+})(MessageTag || (exports.MessageTag = MessageTag = {}));
 //# sourceMappingURL=models.js.map

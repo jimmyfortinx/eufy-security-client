@@ -1,15 +1,17 @@
 /// <reference types="node" />
+/// <reference types="node" />
 import { Readable } from "stream";
 import { Method } from "got";
-import { StreamMetadata } from "../p2p/interfaces";
+import { ImageType as ImageFileExtension } from "image-type";
+import { DatabaseCountByDate, DatabaseQueryLatestInfo, DatabaseQueryLocal, StreamMetadata } from "../p2p/interfaces";
 import { CommandResult } from "../p2p/models";
-import { AlarmEvent, ChargingType, SmartSafeAlarm911Event, SmartSafeShakeAlarmEvent } from "../p2p/types";
+import { AlarmEvent, ChargingType, DatabaseReturnCode, SmartSafeAlarm911Event, SmartSafeShakeAlarmEvent, TFCardStatus } from "../p2p/types";
 import { Camera, Device } from "./device";
 import { Cipher, Voice, Invite, DeviceListResponse, StationListResponse, HouseListResponse } from "./models";
 import { Station } from "./station";
 import { CommandName, PropertyName } from "./types";
 import { TalkbackStream } from "../p2p/talkback";
-export type PropertyValue = number | boolean | string;
+export type PropertyValue = number | boolean | string | object;
 export interface PropertyValues {
     [index: string]: PropertyValue;
 }
@@ -45,10 +47,11 @@ export interface Invites {
 }
 export interface HTTPApiRequest {
     method: Method;
-    endpoint: string;
+    endpoint: string | URL;
+    responseType?: "text" | "json" | "buffer";
     data?: any;
 }
-export type PropertyMetadataType = "number" | "boolean" | "string";
+export type PropertyMetadataType = "number" | "boolean" | "string" | "object";
 export interface PropertyMetadataAny {
     key: number | string;
     name: PropertyName;
@@ -79,6 +82,10 @@ export interface PropertyMetadataString extends PropertyMetadataAny {
     maxLength?: number;
     default?: string;
     format?: RegExp;
+}
+export interface PropertyMetadataObject extends PropertyMetadataAny {
+    type: "object";
+    default?: any;
 }
 export interface IndexedProperty {
     [index: string]: PropertyMetadataAny;
@@ -121,6 +128,14 @@ export interface Schedule {
         sunday: boolean;
     };
 }
+export interface ImageType {
+    ext: ImageFileExtension | "unknown";
+    mime: string;
+}
+export interface Picture {
+    data: Buffer;
+    type: ImageType;
+}
 export interface HTTPApiEvents {
     "devices": (devices: FullDevices) => void;
     "hubs": (hubs: Hubs) => void;
@@ -137,7 +152,7 @@ export interface StationEvents {
     "close": (station: Station) => void;
     "connection error": (station: Station, error: Error) => void;
     "raw device property changed": (deviceSN: string, params: RawValues) => void;
-    "property changed": (station: Station, name: string, value: PropertyValue) => void;
+    "property changed": (station: Station, name: string, value: PropertyValue, ready: boolean) => void;
     "raw property changed": (station: Station, type: number, value: string) => void;
     "command result": (station: Station, result: CommandResult) => void;
     "download start": (station: Station, channel: number, metadata: StreamMetadata, videostream: Readable, audiostream: Readable) => void;
@@ -169,9 +184,15 @@ export interface StationEvents {
     "device low battery": (deviceSN: string) => void;
     "device wrong try-protect alarm": (deviceSN: string) => void;
     "device pin verified": (deviceSN: string, successfull: boolean) => void;
+    "sd info ex": (station: Station, sdStatus: TFCardStatus, sdCapacity: number, sdCapacityAvailable: number) => void;
+    "image download": (station: Station, file: string, image: Buffer) => void;
+    "database query latest": (station: Station, returnCode: DatabaseReturnCode, data: Array<DatabaseQueryLatestInfo>) => void;
+    "database query local": (station: Station, returnCode: DatabaseReturnCode, data: Array<DatabaseQueryLocal>) => void;
+    "database count by date": (station: Station, returnCode: DatabaseReturnCode, data: Array<DatabaseCountByDate>) => void;
+    "database delete": (station: Station, returnCode: DatabaseReturnCode, failedIds: Array<unknown>) => void;
 }
 export interface DeviceEvents {
-    "property changed": (device: Device, name: string, value: PropertyValue) => void;
+    "property changed": (device: Device, name: string, value: PropertyValue, ready: boolean) => void;
     "raw property changed": (device: Device, type: number, value: string) => void;
     "motion detected": (device: Device, state: boolean) => void;
     "person detected": (device: Device, state: boolean, person: string) => void;

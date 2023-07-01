@@ -55,12 +55,14 @@ export declare class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEve
     private secondaryCommandTimeout?;
     private connectTime;
     private lastPong;
+    private lastPongData;
     private connectionType;
     private energySavingDevice;
     private energySavingDeviceP2PSeqMapping;
     private energySavingDeviceP2PDataSeqNumber;
     private connectAddress;
     private localIPAddress;
+    private preferredIPAddress;
     private dskKey;
     private dskExpiration;
     private log;
@@ -72,7 +74,7 @@ export declare class P2PClientProtocol extends TypedEmitter<P2PClientProtocolEve
     private lockPublicKey;
     private lockAESKeys;
     private channel;
-    constructor(rawStation: StationListResponse, api: HTTPApi, publicKey?: string);
+    constructor(rawStation: StationListResponse, api: HTTPApi, ipAddress?: string, publicKey?: string);
     private _incrementSequence;
     private _isBetween;
     private _wasSequenceNumberAlreadyProcessed;

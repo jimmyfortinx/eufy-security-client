@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { TypedEmitter } from "tiny-typed-emitter";
 import { Logger } from "ts-log";
 import { TrustDevice, Cipher, EventRecordResponse, ConfirmInvite, SensorHistoryEntry, ApiResponse, HouseDetail, DeviceListResponse, StationListResponse, HouseInviteListResponse, HouseListResponse, PassportProfileResponse, User, AddUserResponse } from "./models";
@@ -74,7 +75,7 @@ export declare class HTTPApi extends TypedEmitter<HTTPApiEvents> {
     getInvites(): Promise<Invites>;
     confirmInvites(confirmInvites: Array<ConfirmInvite>): Promise<boolean>;
     getPublicKey(deviceSN: string, type: PublicKeyType): Promise<string>;
-    decryptAPIData(data: string, json?: boolean): any;
+    decryptAPIData(data?: string, json?: boolean): any;
     getSensorHistory(stationSN: string, deviceSN: string): Promise<Array<SensorHistoryEntry>>;
     getHouseDetail(houseID: string): Promise<HouseDetail | null>;
     getHouseList(): Promise<Array<HouseListResponse>>;
@@ -87,4 +88,5 @@ export declare class HTTPApi extends TypedEmitter<HTTPApiEvents> {
     getUsers(deviceSN: string, stationSN: string): Promise<Array<User> | null>;
     getUser(deviceSN: string, stationSN: string, shortUserId: string): Promise<User | null>;
     updateUser(deviceSN: string, stationSN: string, shortUserId: string, nickname: string): Promise<boolean>;
+    getImage(deviceSN: string, url: string): Promise<Buffer>;
 }

@@ -1,11 +1,13 @@
 /// <reference types="node" />
 import { Device } from "./device";
-import { Schedule } from "./interfaces";
+import { Picture, Schedule } from "./interfaces";
 import { NotificationSwitchMode, SignalLevel, HB3DetectionTypes } from "./types";
+import { HTTPApi } from "./api";
 export declare const isGreaterEqualMinVersion: (minimal_version: string, current_version: string) => boolean;
 export declare const pad: (num: number) => string;
 export declare const getTimezoneGMTString: () => string;
 export declare const getAbsoluteFilePath: (device_type: number, channel: number, filename: string) => string;
+export declare const getImageFilePath: (device_type: number, channel: number, filename: string) => string;
 export declare const isNotificationSwitchMode: (value: number, mode: NotificationSwitchMode) => boolean;
 export declare const switchNotificationMode: (currentValue: number, mode: NotificationSwitchMode, enable: boolean) => number;
 export declare const calculateWifiSignalLevel: (device: Device, rssi: number) => SignalLevel;
@@ -35,3 +37,10 @@ export declare const hexDate: (date: Date) => string;
 export declare const hexTime: (date: Date) => string;
 export declare const hexWeek: (schedule: Schedule) => string;
 export declare const randomNumber: (min: number, max: number) => number;
+export declare const getIdSuffix: (p2pDid: string) => number;
+export declare const getImageBaseCode: (serialnumber: string, p2pDid: string) => string;
+export declare const getImageSeed: (p2pDid: string, code: string) => string;
+export declare const getImageKey: (serialnumber: string, p2pDid: string, code: string) => string;
+export declare const decodeImage: (p2pDid: string, data: Buffer) => Buffer;
+export declare const getImagePath: (path: string) => string;
+export declare const getImage: (api: HTTPApi, serial: string, url: string) => Promise<Picture>;

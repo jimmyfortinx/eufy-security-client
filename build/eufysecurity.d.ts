@@ -30,8 +30,9 @@ export declare class EufySecurity extends TypedEmitter<EufySecurityEvents> {
     private refreshEufySecurityCloudTimeout?;
     private refreshEufySecurityP2PTimeout;
     private deviceSnoozeTimeout;
-    private loadingStations?;
-    private loadingDevices?;
+    private stationsLoaded;
+    private devicesLoaded;
+    private loadingEmitter;
     private constructor();
     static initialize(config: EufySecurityConfig, log?: Logger): Promise<EufySecurity>;
     protected _initializeInternals(): Promise<void>;
@@ -40,10 +41,12 @@ export declare class EufySecurity extends TypedEmitter<EufySecurityEvents> {
     private addStation;
     private removeStation;
     private updateStation;
+    private getStorageInfo;
     private addDevice;
     private removeDevice;
     private updateDevice;
     getDevices(): Promise<Array<Device>>;
+    getDevicesFromStation(stationSN: string): Promise<Array<Device>>;
     getDevice(deviceSN: string): Promise<Device>;
     getStationDevice(stationSN: string, channel: number): Promise<Device>;
     getStations(): Promise<Array<Station>>;
@@ -156,4 +159,10 @@ export declare class EufySecurity extends TypedEmitter<EufySecurityEvents> {
     updateUserPasscode(deviceSN: string, username: string, passcode: string): Promise<void>;
     updateUserSchedule(deviceSN: string, username: string, schedule: Schedule): Promise<void>;
     private onStationDevicePinVerified;
+    private onStationSdInfoEx;
+    private onStationImageDownload;
+    private onStationDatabaseQueryLatest;
+    private onStationDatabaseQueryLocal;
+    private onStationDatabaseCountByDate;
+    private onStationDatabaseDelete;
 }
